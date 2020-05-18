@@ -1,0 +1,31 @@
+---
+- hosts: localhost
+  connection: local
+  tasks: 
+
+    - name: add container prod to inv
+      add_host:
+        name: httpd_prod
+        ansible_connection: docker
+        ansible_host: prod
+
+    - name: add container pre_prod to inv
+      add_host:
+        name: httpd_pre_prod
+        ansible_connection: docker
+        ansible_host: pre_prod
+  
+- hosts: httpd_pre_prod
+  tasks:
+    - name: copy index pre_prod => localhost  
+      fetch:
+        src:  /usr/local/apache2/htdocs/index.html
+        dest: /tmp/index.html
+        flat: true
+
+- hosts: httpd_prod
+  tasks:
+    - name: copy index localhost => prod
+    copy:
+        src: /tmp/index.html 
+        dest: /usr/local/apache2/htdocs/index.html
